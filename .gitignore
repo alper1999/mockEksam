@@ -1,5 +1,5 @@
 .idea
 dist/
 .parcel-cache/
-/server/.env
+/.env
 coverage/
