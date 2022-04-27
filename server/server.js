@@ -1,4 +1,4 @@
-import express, {Router} from "express";
+
 import * as path from "path";
 import {MoviesApi} from "./moviesApi.js";
 import {MongoClient} from "mongodb"
@@ -11,18 +11,6 @@ const app = express()
 app.use(bodyParser.json())
 
 
-const Movies = new Router();
-Movies.get("/",(req,res) =>{
-    res.json([
-        {
-            title:"movie1",
-        }
-    ])
-
-})
-Movies.post("/new", (req,res) =>{
-    res.sendStatus(500);
-})
 
 
 const mongoClient = new MongoClient(process.env.MONGODB_URL);
