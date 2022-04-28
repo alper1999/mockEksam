@@ -8,10 +8,10 @@ export function MoviesApi(mongoDatabase) {
             .collection("movies")
             .find({
                 countries: {
-                    $in: ["Turkey"],
+                    $in: ["Ukraine"],
                 },
                 year: {
-                    $gte: 1990,
+                    $gte: 2000,
                 },
             })
             .sort({
@@ -29,14 +29,12 @@ export function MoviesApi(mongoDatabase) {
         res.json(movies);
     });
 
-    router.post("/", (req, res) => {
-        const { title, country, year } = req.body;
+    router.post("/new", (req, res) => {
+        const { title } = req.body;
         const result = mongoDatabase.collection("movies").insertOne({
             title,
-            countries: [country],
-            year,
         });
-        res.sendStatus(200);
+        res.sendStatus(500);
     });
 
     return router;
