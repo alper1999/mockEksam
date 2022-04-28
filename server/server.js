@@ -31,6 +31,7 @@ if (process.env.MONGODB_URL) {
                 })
                 .limit(10)
                 .toArray();
+
             res.json(result);
         });
 
