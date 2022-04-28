@@ -1,32 +1,56 @@
 import express from "express";
-import * as path from "path";
-import { MoviesApi } from "./moviesApi.js";
 import { MongoClient } from "mongodb";
+import bodyParser from "body-parser";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
+app.use(bodyParser.json());
 
-const mongoClient = new MongoClient(process.env.MONGODB_URL);
-mongoClient.connect().then(async () => {
-    console.log("Connected to mongodb");
-    app.use(
-        "/api/movies",
-        MoviesApi(mongoClient.db(process.env.MONGODB_DATABASE || "pg6301-7"))
-    );
-});
+if (process.env.MONGODB_URL) {
+    const client = new MongoClient(process.env.MONGODB_URL);
+    client.connect().then((connection) => {
+        const database = connection.db("sample_mflix");
+        app.get("/api/movies", async (req, res) => {
+            const result = await database
+                .collection("movies")
+                .find({
+                    countries: { $in: ["Norway"] },
+                    year: { $gt: 1999 },
+                })
+                .sort({ year: -1 })
+                .project({
+                    title: 1,
+                    plot: 2,
+                    fullplot: 3,
+                    directors: 4,
+                    countries: 5,
+                    poster: 6,
+                    year: 7,
+                })
+                .limit(10)
+                .toArray();
+            res.json(result);
+        });
+
+        app.post("/api/movies", async (req, res) => {
+            const { title, year, directors, fullplot, countries } = req.body;
+            const result = await database.collection("movies").insertOne({
+                title,
+                year,
+                directors,
+                fullplot,
+                countries,
+            });
+            console.log({ result });
+            res.sendStatus(200);
+        });
+    });
+}
 
 app.use(express.static("../client/dist/"));
 
-app.use((req, res, next) => {
-    if (req.method === "GET" && !req.path.startsWith("/api")) {
-        res.sendFile(path.resolve("../client/dist/index.html"));
-    } else {
-        next();
-    }
-});
-
-const server = app.listen(process.env.PORT || 3000, () => {
+const server = app.listen(3000, () => {
     console.log(`Started on http://localhost:${server.address().port}`);
 });

@@ -49,17 +49,19 @@ async function fetchJSON(url) {
     return await res.json();
 }
 
-function MovieCard({ movie: { title, plot, poster } }) {
+function MovieCard({ movie: { title, plot, poster,year,fullplot } }) {
     return (
         <>
             <h3>{title}</h3>
             {poster && <img src={poster} width={100} alt={"Movie poster"} />}
             <div>{plot}</div>
+            <div>{fullplot}</div>
+            <div>{year}</div>
         </>
     );
 }
 
-function ListMovies() {
+export function ListMovies() {
     const { loading, error, data } = useLoading(async () =>
         fetchJSON("/api/movies")
     );
