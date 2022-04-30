@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import fetch from "node-fetch";
+import path from "path";
 
 dotenv.config();
 
@@ -67,6 +68,16 @@ async function fetchJSON(url, options) {
     }
     return await res.json();
 }
+app.get("/api/config", (req, res) => {
+    res.json({
+        response_type: "token",
+        client_id:
+            "922011245740-23sohjmc1r12effq1rsffit53fv868ek.apps.googleusercontent.com",
+        discovery_endpoint:
+            "https://accounts.google.com/.well-known/openid-configuration",
+    });
+});
+
 
 app.get("/api/login", async (req, res) => {
     const { access_token } = req.signedCookies;
@@ -86,6 +97,13 @@ app.get("/api/login", async (req, res) => {
 
 app.use(express.static("../client/dist/"));
 
+app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api")) {
+        res.sendFile(path.resolve("../client/dist/index.html"));
+    } else {
+        next();
+    }
+});
 
 const server = app.listen(process.env.PORT || 3000, () => {
     console.log(`started on http://localhost:${server.address().port}`);

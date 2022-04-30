@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import ReactDOM from "react-dom";
 import React, { useEffect } from "react"
 import {BrowserRouter, Link, Route, Routes, useNavigate} from "react-router-dom";
@@ -127,5 +127,25 @@ function Profile() {
         </div>
     );
 }
+function useLoader(loadingFn) {
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState();
+    const [error, setError] = useState();
+
+    async function load() {
+        try {
+            setLoading(true);
+            setData(await loadingFn());
+        } catch (error) {
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => load(), []);
+    return { loading, data, error };
+}
+
 
 ReactDOM.render(<Application/>, document.getElementById("app"));
