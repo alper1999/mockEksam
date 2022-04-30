@@ -56,7 +56,7 @@ function MovieCard({ movie: { title, plot, poster,year,fullplot } }) {
             {poster && <img src={poster} width={100} alt={"Movie poster"} />}
             <div>{plot}</div>
             <div>{fullplot}</div>
-            <div>{year}</div>
+            <h2>{year}</h2>
         </>
     );
 }

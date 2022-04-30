@@ -2,6 +2,8 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -16,7 +18,7 @@ if (process.env.MONGODB_URL) {
             const result = await database
                 .collection("movies")
                 .find({
-                    countries: { $in: ["Norway"] },
+                    countries: { $in: ["Sweden"] },
                     year: { $gt: 1999 },
                 })
                 .sort({ year: -1 })
@@ -49,6 +51,38 @@ if (process.env.MONGODB_URL) {
         });
     });
 }
+app.use(bodyParser.json());
+app.use(cookieParser(process.env.COOKIE_SECRET));
+
+app.post("/api/login", (req, res) => {
+    const { access_token } = req.body;
+    res.cookie("access_token", access_token, { signed: true });
+    res.sendStatus(200);
+});
+
+async function fetchJSON(url, options) {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+        throw new Error(`Failed ${res.status}`);
+    }
+    return await res.json();
+}
+
+app.get("/api/login", async (req, res) => {
+    const { access_token } = req.signedCookies;
+
+    const { userinfo_endpoint } = await fetchJSON(
+        "https://accounts.google.com/.well-known/openid-configuration"
+    );
+    const userinfo = await fetchJSON(userinfo_endpoint, {
+        headers: {
+            Authorization: `Bearer ${access_token}`,
+        },
+    });
+
+    res.json(userinfo);
+});
+
 
 app.use(express.static("../client/dist/"));
 
@@ -56,3 +90,5 @@ app.use(express.static("../client/dist/"));
 const server = app.listen(process.env.PORT || 3000, () => {
     console.log(`started on http://localhost:${server.address().port}`);
 });
+
+

@@ -8,7 +8,7 @@ export function MoviesApi(mongoDatabase) {
             .collection("movies")
             .find({
                 countries: {
-                    $in: ["Ukraine"],
+                    $in: ["Sweden"],
                 },
                 year: {
                     $gte: 2000,
