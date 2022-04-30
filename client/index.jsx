@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+
 import ReactDOM from "react-dom";
 import React, { useEffect } from "react"
 import {BrowserRouter, Link, Route, Routes, useNavigate} from "react-router-dom";
@@ -28,22 +28,34 @@ async function fetchJSON(url) {
     }
     return await res.json();
 }
+const LoginContext = React.createContext();
+
 
 function Application() {
     async function listMovies(){
         return await fetchJSON("/api/movies")
     }
-    return <BrowserRouter>
-        <Routes>
-            <Route path={"/"} element={<Frontpage/>}/>
-            <Route path={"/addNewMovie"} element={<AddMovie/>}/>
-            <Route path={"/movies"} element={<ListMovies listMovies={listMovies}/>}/>
-            <Route path={"/login"} element={<Login />} />
-            <Route path={"/login/callback"} element={<LoginCallback />} />
-            <Route path={"/profile"} element={<Profile />} />
-        </Routes>
-    </BrowserRouter>
-
+    const { loading, error, data } = useLoader(() => fetchJSON("/api/config"));
+    if (loading) {
+        return <div>Loading..</div>;
+    }
+    if (error) {
+        return <div>{error.toString()}</div>;
+    }
+    return (
+        <LoginContext.Provider value={data}>
+            <BrowserRouter>
+                <Routes>
+                    <Route path={"/"} element={<Frontpage/>}/>
+                    <Route path={"/addNewMovie"} element={<AddMovie/>}/>
+                    <Route path={"/movies"} element={<ListMovies listMovies={listMovies}/>}/>
+                    <Route path={"/login"} element={<Login />} />
+                    <Route path={"/login/callback"} element={<LoginCallback />} />
+                    <Route path={"/profile"} element={<Profile />} />
+                </Routes>
+            </BrowserRouter>
+        </LoginContext.Provider>
+    );
 }
 export async function postJSON(url, body) {
     const res = await fetch(url, {
