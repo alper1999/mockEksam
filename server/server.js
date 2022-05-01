@@ -5,12 +5,14 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import fetch from "node-fetch";
 import path from "path";
+import { WebSocketServer } from "ws";
 
 dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
 
+//hente ut filmer og filterer
 if (process.env.MONGODB_URL) {
     const client = new MongoClient(process.env.MONGODB_URL);
     client.connect().then((connection) => {
@@ -37,7 +39,7 @@ if (process.env.MONGODB_URL) {
 
             res.json(result);
         });
-
+//isnerte filmer
         app.post("/api/movies", async (req, res) => {
             const { title, year, directors, fullplot, countries } = req.body;
             const result = await database.collection("movies").insertOne({
@@ -52,15 +54,15 @@ if (process.env.MONGODB_URL) {
         });
     });
 }
-app.use(bodyParser.json());
+//cookie secret for å logge inn
 app.use(cookieParser(process.env.COOKIE_SECRET));
-
+//logge inn med token
 app.post("/api/login", (req, res) => {
     const { access_token } = req.body;
     res.cookie("access_token", access_token, { signed: true });
     res.sendStatus(200);
 });
-
+//feilmelding
 async function fetchJSON(url, options) {
     const res = await fetch(url, options);
     if (!res.ok) {
@@ -68,6 +70,7 @@ async function fetchJSON(url, options) {
     }
     return await res.json();
 }
+//logge inn og hente client id
 app.get("/api/config", (req, res) => {
     res.json({
         response_type: "token",
@@ -78,7 +81,7 @@ app.get("/api/config", (req, res) => {
     });
 });
 
-
+//logge inn
 app.get("/api/login", async (req, res) => {
     const { access_token } = req.signedCookies;
 
@@ -100,7 +103,7 @@ app.get("/api/login", async (req, res) => {
 
 
 app.use(express.static("../client/dist/"));
-
+//logge inn
 app.use((req, res, next) => {
     if (req.method === "GET" && !req.path.startsWith("/api")) {
         res.sendFile(path.resolve("../client/dist/index.html"));
@@ -109,8 +112,31 @@ app.use((req, res, next) => {
     }
 });
 
+
+const wsServer = new WebSocketServer({ noServer: true });
+
+const sockets = [];
+
+wsServer.on("connect", (socket) => {
+    sockets.push(socket);
+    setTimeout(() => {
+        socket.send(JSON.stringify({ author: "Server", message: "Hello there" }));
+    }, 1000);
+    socket.on("message", (data) => {
+        const { author, message } = JSON.parse(data);
+        for (const recipient of sockets) {
+            recipient.send(JSON.stringify({ author, message }));
+        }
+    });
+});
+
 const server = app.listen(process.env.PORT || 3000, () => {
-    console.log(`started on http://localhost:${server.address().port}`);
+    console.log(`http://localhost:${server.address().port}`);
+    server.on("upgrade", (req, socket, head) => {
+        wsServer.handleUpgrade(req, socket, head, (socket) => {
+            wsServer.emit("connect", socket, req);
+        });
+    });
 });
 
 

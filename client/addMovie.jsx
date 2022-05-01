@@ -51,6 +51,7 @@ function FormTextarea({ label, value, setValue }) {
 }
 
  export function AddMovie() {
+
     const [title, setTitle] = useState("");
     const [year, setYear] = useState("");
     const [director, setDirector] = useState("");
