@@ -26,5 +26,7 @@
   "homepage": "https://github.com/alper1999/mockEksam#readme",
   "devDependencies": {
     "concurrently": "^7.1.0"
+  },
+  "dependencies": {
   }
 }

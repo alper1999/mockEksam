@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import fetch from "node-fetch";
 import path from "path";
 import { WebSocketServer } from "ws";
+import {MoviesApi} from "./moviesApi.js";
 
 dotenv.config();
 
@@ -13,47 +14,14 @@ const app = express();
 app.use(bodyParser.json());
 
 //hente ut filmer og filterer
-if (process.env.MONGODB_URL) {
-    const client = new MongoClient(process.env.MONGODB_URL);
-    client.connect().then((connection) => {
-        const database = connection.db("sample_mflix");
-        app.get("/api/movies", async (req, res) => {
-            const result = await database
-                .collection("movies")
-                .find({
-                    countries: { $in: ["Sweden"] },
-                    year: { $gt: 1999 },
-                })
-                .sort({ year: -1 })
-                .project({
-                    title: 1,
-                    plot: 2,
-                    fullplot: 3,
-                    directors: 4,
-                    countries: 5,
-                    poster: 6,
-                    year: 7,
-                })
-                .limit(10)
-                .toArray();
-
-            res.json(result);
-        });
-//isnerte filmer
-        app.post("/api/movies", async (req, res) => {
-            const { title, year, directors, fullplot, countries } = req.body;
-            const result = await database.collection("movies").insertOne({
-                title,
-                year,
-                directors,
-                fullplot,
-                countries,
-            });
-            console.log({ result });
-            res.sendStatus(200);
-        });
-    });
-}
+const mongoClient = new MongoClient(process.env.MONGODB_URL);
+mongoClient.connect().then(async () => {
+    console.log("Connected to mongodb");
+    app.use(
+        "/api/movies",
+        MoviesApi(mongoClient.db(process.env.MONGODB_DATABASE || "pg6301-7"))
+    );
+});
 //cookie secret for å logge inn
 app.use(cookieParser(process.env.COOKIE_SECRET));
 //logge inn med token

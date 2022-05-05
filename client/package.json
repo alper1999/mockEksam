@@ -42,7 +42,7 @@
       "/*.jsx",
       "/*.js",
       "!dist/",
-      "!coverage/"
+      "!coverage/**"
     ]
   }
 }

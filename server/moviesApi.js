@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 
 export function MoviesApi(mongoDatabase) {
@@ -8,7 +9,7 @@ export function MoviesApi(mongoDatabase) {
             .collection("movies")
             .find({
                 countries: {
-                    $in: ["Sweden"],
+                    $in: ["Ukraine"],
                 },
                 year: {
                     $gte: 2000,
@@ -29,12 +30,14 @@ export function MoviesApi(mongoDatabase) {
         res.json(movies);
     });
 
-    router.post("/new", (req, res) => {
-        const { title } = req.body;
+    router.post("/", (req, res) => {
+        const { title, text, date } = req.body;
         const result = mongoDatabase.collection("movies").insertOne({
             title,
+            date: [date],
+            text,
         });
-        res.sendStatus(500);
+        res.sendStatus(200);
     });
 
     return router;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
-function FrontPage() {
+ export function FrontPage() {
     return (
         <div>
             <h1>Movie Database</h1>
@@ -18,7 +18,7 @@ function FrontPage() {
     );
 }
 
-function useLoading(loadingFunction) {
+ function useLoading(loadingFunction) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState();
     const [data, setData] = useState();
@@ -41,7 +41,7 @@ function useLoading(loadingFunction) {
     return { loading, error, data };
 }
 
-async function fetchJSON(url) {
+export async function fetchJSON(url) {
     const res = await fetch(url);
     if (!res.ok) {
         throw new Error(`Failed to load ${res.status}: ${res.statusText}`);
@@ -49,11 +49,11 @@ async function fetchJSON(url) {
     return await res.json();
 }
 
-function MovieCard({ movie: { title, plot, poster,year,fullplot } }) {
+ function MovieCard({ movie: { title, plot, poster,year,fullplot } }) {
     return (
         <>
             <h3>{title}</h3>
-            {poster && <img src={poster} width={100} alt={"Movie poster"} />}
+            {poster && <img src={poster} width={300} alt={"Movie poster"} />}
             <div>{plot}</div>
             <div>{fullplot}</div>
             <h2>{year}</h2>
@@ -89,7 +89,7 @@ export function ListMovies() {
     );
 }
 
-function AddNewMovie() {
+export function AddNewMovie() {
     return (
         <form>
             <h1>Add new movie</h1>
@@ -97,7 +97,7 @@ function AddNewMovie() {
     );
 }
 
-function Application() {
+export function Application() {
     return (
         <BrowserRouter>
             <Routes>

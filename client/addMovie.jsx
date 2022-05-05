@@ -1,4 +1,4 @@
-import {postJSON} from "./index";
+import {postJSON} from "../../../IdeaProjects/mockEksam/client";
 import {useState} from "react";
 import React from "react";
 
@@ -29,9 +29,7 @@ function FormTextarea({ label, value, setValue }) {
     );
 }
 
- export function MovieView({
-                       movie: { countries, directors, fullplot, poster, title, year },
-                   }) {
+ export function MovieView({movie: { countries, directors, fullplot, poster, title, year },}) {
     return (
         <div>
             <h3>
